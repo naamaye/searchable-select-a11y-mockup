@@ -1,0 +1,973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rich selected value — a11y solutions mockup</title>
+  <style>
+    :root {
+      --bg: #f5f6fa;
+      --surface: #fff;
+      --text: #323338;
+      --text-secondary: #676879;
+      --border: #c3c6d4;
+      --border-hover: #9699a6;
+      --focus: #0073ea;
+      --focus-ring: rgba(0, 115, 234, 0.35);
+      --option-active: #cce5ff;
+      --option-hover: #f0f3ff;
+      --ok: #258750;
+      --radius: 4px;
+      --font: "Figtree", "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      color: var(--text);
+      background:
+        radial-gradient(1000px 500px at 0% 0%, #e8eefc, transparent 55%),
+        radial-gradient(800px 400px at 100% 0%, #f5eaf4, transparent 50%),
+        var(--bg);
+      padding: 40px 24px 80px;
+      line-height: 1.45;
+    }
+    .page { max-width: 980px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; letter-spacing: -0.02em; }
+    .lede { color: var(--text-secondary); max-width: 68ch; margin: 0 0 28px; font-size: 0.95rem; }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .tab {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 8px 16px;
+      font: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      color: var(--text);
+    }
+    .tab[aria-selected="true"] {
+      background: #e6f2ff;
+      border-color: var(--focus);
+      color: #003d7a;
+    }
+    .tab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .panel {
+      display: none;
+      background: var(--surface);
+      border: 1px solid #e6e9ef;
+      border-radius: 14px;
+      padding: 24px;
+      box-shadow: 0 1px 2px rgba(50,51,56,.05);
+    }
+    .panel.is-active { display: block; }
+
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--ok);
+      background: #e7f5ec;
+      padding: 4px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .panel h2 { margin: 0 0 8px; font-size: 1.15rem; }
+    .panel .desc { color: var(--text-secondary); font-size: 0.9rem; margin: 0 0 22px; max-width: 62ch; }
+
+    .demo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 720px) {
+      .demo-grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      border: 1px solid #e6e9ef;
+      border-radius: 10px;
+      padding: 16px;
+      background: #fafbfc;
+    }
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+    .helper {
+      margin: 6px 0 0;
+      font-size: 0.8125rem;
+      color: var(--text-secondary);
+    }
+
+    /* Shared control chrome */
+    .control {
+      position: relative;
+      display: flex;
+      align-items: center;
+      min-height: 40px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      max-width: 300px;
+    }
+    .control:hover { border-color: var(--border-hover); }
+    .control.is-focused,
+    .control.is-open {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding-right: 6px;
+      margin-left: auto;
+      flex-shrink: 0;
+      position: relative;
+      z-index: 2;
+    }
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border: 0;
+      border-radius: var(--radius);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0;
+    }
+    .icon-btn:hover { background: #f0f1f5; color: var(--text); }
+    .icon-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+    .icon-btn[hidden] { display: none; }
+    .icon-btn svg { width: 16px; height: 16px; display: block; }
+
+    .avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .avatar.a { background: #6161ff; }
+    .avatar.b { background: #fdab3d; color: #323338; }
+    .avatar.c { background: #00ca72; }
+    .opt-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      background: #e6f2ff;
+      color: var(--focus);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      flex-shrink: 0;
+    }
+
+    .listbox {
+      position: absolute;
+      z-index: 30;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      margin: 0;
+      padding: 6px 0;
+      list-style: none;
+      background: #fff;
+      border: 1px solid #e6e9ef;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(50,51,56,.12);
+      max-height: 220px;
+      overflow-y: auto;
+    }
+    .listbox[hidden] { display: none; }
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .option.is-active { background: var(--option-active); }
+    .option:hover:not(.is-active) { background: var(--option-hover); }
+    .option .check { margin-left: auto; color: var(--focus); font-weight: 700; }
+    .empty { padding: 12px; font-size: 0.875rem; color: var(--text-secondary); }
+
+    .callout {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #f0f3ff;
+      border: 1px solid #d0dcf5;
+      font-size: 0.8125rem;
+      color: var(--text);
+    }
+    .callout strong { font-weight: 600; }
+    .kbd {
+      font-family: ui-monospace, Menlo, monospace;
+      font-size: 0.8em;
+      background: #fff;
+      border: 1px solid #d0d4e0;
+      border-radius: 3px;
+      padding: 0 5px;
+    }
+    .layers {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+    .layers code {
+      font-size: 0.78em;
+      background: #fff;
+      border: 1px solid #e6e9ef;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
+
+    /* —— Solution A: dual layer —— */
+    .a-wrap { position: relative; max-width: 300px; }
+    .a-input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+      padding: 8px 8px 8px 12px;
+      outline: none;
+      line-height: 1.4;
+      position: relative;
+      z-index: 1;
+    }
+    .a-input::placeholder { color: var(--text-secondary); }
+
+    /* Rich chrome sits over the input text when selected & not filtering */
+    .a-rich {
+      position: absolute;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: none;
+      align-items: center;
+      gap: 8px;
+      pointer-events: none;
+      z-index: 2;
+      max-width: calc(100% - 72px);
+    }
+    .control.has-rich:not(.is-filtering) .a-rich { display: flex; }
+    .control.has-rich:not(.is-filtering) .a-input {
+      /* Hide caret while decorative rich layer is showing — avoids cutting through overlay text */
+      color: transparent;
+      caret-color: transparent;
+    }
+    .a-rich-label {
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text);
+    }
+
+    /* —— Solution B: button trigger + search in popup —— */
+    .b-trigger {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+      padding: 8px 8px 8px 12px;
+      cursor: pointer;
+      text-align: left;
+      outline: none;
+    }
+    .b-trigger .placeholder { color: var(--text-secondary); font-weight: 400; }
+    .b-trigger .value-label { font-weight: 500; }
+
+    .b-popup {
+      position: absolute;
+      z-index: 30;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      background: #fff;
+      border: 1px solid #e6e9ef;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(50,51,56,.12);
+      padding: 8px;
+    }
+    .b-popup[hidden] { display: none; }
+    .b-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 10px;
+      margin-bottom: 6px;
+      min-height: 36px;
+    }
+    .b-search-wrap:focus-within {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .b-search {
+      flex: 1;
+      border: 0;
+      outline: none;
+      font: inherit;
+      font-size: 0.875rem;
+      padding: 8px 0;
+      background: transparent;
+    }
+    .b-search::placeholder { color: var(--text-secondary); }
+    .b-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      max-height: 180px;
+      overflow-y: auto;
+    }
+
+    .compare {
+      margin-top: 28px;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8125rem;
+    }
+    th, td {
+      border: 1px solid #e6e9ef;
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { background: #f6f7fb; font-weight: 600; }
+    td.yes { color: var(--ok); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Rich selected value — two accessible solutions</h1>
+    <p class="lede">
+      Icons/avatars in the collapsed field without going back to “empty input + overlay = blank.”
+      Try both demos with keyboard.
+    </p>
+
+    <div class="tabs" role="tablist" aria-label="Solutions">
+      <button class="tab" role="tab" id="tab-a" aria-selected="true" aria-controls="panel-a">Solution A — Dual layer</button>
+      <button class="tab" role="tab" id="tab-b" aria-selected="false" aria-controls="panel-b">Solution B — Rich trigger + search</button>
+      <button class="tab" role="tab" id="tab-c" aria-selected="false" aria-controls="panel-c">Compare</button>
+    </div>
+
+    <!-- SOLUTION A -->
+    <section class="panel is-active" id="panel-a" role="tabpanel" aria-labelledby="tab-a">
+      <span class="badge">Recommended if you keep type-in-trigger</span>
+      <h2>Dual layer: real input value + decorative rich UI</h2>
+      <p class="desc">
+        Selected label stays in the native <code>&lt;input&gt;</code> for screen readers.
+        Avatar + label are painted on top with <code>aria-hidden</code> and pointer-events none.
+        When you type to filter, rich chrome hides and the real caret/text show.
+      </p>
+
+      <div class="demo-grid">
+        <div class="card">
+          <h3>Interactive</h3>
+          <div class="a-wrap" id="a-root">
+            <label class="field-label" id="a-label" for="a-input">Assignee</label>
+            <div class="control" id="a-control">
+              <div class="a-rich" id="a-rich" aria-hidden="true">
+                <span class="avatar a" id="a-rich-avatar">JM</span>
+                <span class="a-rich-label" id="a-rich-label">Julia Martinez</span>
+              </div>
+              <input
+                class="a-input"
+                id="a-input"
+                type="text"
+                role="combobox"
+                aria-labelledby="a-label"
+                aria-describedby="a-helper"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="a-listbox"
+                aria-haspopup="listbox"
+                autocomplete="off"
+                placeholder="Select an assignee"
+              />
+              <div class="actions">
+                <button type="button" class="icon-btn" id="a-clear" aria-label="Clear selection" hidden>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="icon-btn" id="a-toggle" aria-label="Show options" tabindex="-1">
+                  <svg id="a-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <ul class="listbox" id="a-listbox" role="listbox" aria-labelledby="a-label" hidden></ul>
+            </div>
+            <p class="helper" id="a-helper">Value stays in the input. Avatar is visual only.</p>
+            <div class="sr-only" id="a-live" aria-live="polite"></div>
+          </div>
+          <p class="layers">
+            Layer 1: <code>input.value = "Julia Martinez"</code> (AT reads this)<br />
+            Layer 2: avatar + label <code>aria-hidden</code> (sighted only)
+          </p>
+          <p class="callout">
+            <strong>Try:</strong> select someone → see avatar.
+            Then type — rich UI hides, filter text appears.
+            <span class="kbd">Esc</span> closes; focus stays on input.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Static states</h3>
+          <div style="margin-bottom:16px">
+            <span class="field-label">Collapsed selected (rich)</span>
+            <div class="control has-rich" style="pointer-events:none">
+              <div class="a-rich" style="display:flex" aria-hidden="true">
+                <span class="avatar a">JM</span>
+                <span class="a-rich-label">Julia Martinez</span>
+              </div>
+              <!-- Simulated: value present but text transparent -->
+              <span class="a-input" style="color:transparent;display:block;padding:9px 12px">Julia Martinez</span>
+              <div class="actions">
+                <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg></span>
+                <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+            </div>
+          </div>
+          <div>
+            <span class="field-label">Filtering (rich hidden)</span>
+            <div class="control is-open is-filtering" style="pointer-events:none;position:relative;z-index:2">
+              <span class="a-input" style="display:block;padding:9px 12px">Jul</span>
+              <div class="actions">
+                <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg></span>
+                <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12.5l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              </div>
+            </div>
+            <ul class="listbox" style="position:relative;top:4px;display:block" role="presentation">
+              <li class="option is-active"><span class="avatar a">JM</span> Julia Martinez <span class="check">✓</span></li>
+              <li class="option"><span class="avatar b">JL</span> Jordan Lee</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SOLUTION B -->
+    <section class="panel" id="panel-b" role="tabpanel" aria-labelledby="tab-b" hidden>
+      <span class="badge">Best if rich DOM in collapsed field is required</span>
+      <h2>Rich trigger + search inside the popup</h2>
+      <p class="desc">
+        Collapsed control is a <strong>button</strong> that can contain a real avatar + label.
+        Accessible name includes the selection. On open, focus moves to a dedicated search input
+        (your <code>inputAriaLabel</code>). List is options only — search is not an option.
+      </p>
+
+      <div class="demo-grid">
+        <div class="card">
+          <h3>Interactive</h3>
+          <div style="position:relative;max-width:300px" id="b-root">
+            <span class="field-label" id="b-label">Assignee</span>
+            <div class="control" id="b-control">
+              <button
+                type="button"
+                class="b-trigger"
+                id="b-trigger"
+                aria-labelledby="b-label b-value-text"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="b-list"
+              >
+                <span id="b-trigger-content">
+                  <span class="placeholder" id="b-value-text">Select an assignee</span>
+                </span>
+              </button>
+              <div class="actions">
+                <button type="button" class="icon-btn" id="b-clear" aria-label="Clear selection" hidden>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="icon-btn" id="b-chevron-btn" aria-hidden="true" tabindex="-1">
+                  <svg id="b-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="b-popup" id="b-popup" hidden>
+                <div class="b-search-wrap">
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
+                  <input
+                    class="b-search"
+                    id="b-search"
+                    type="text"
+                    aria-label="Filter assignees"
+                    placeholder="Search for assignee"
+                    autocomplete="off"
+                  />
+                </div>
+                <ul class="b-list" id="b-list" role="listbox" aria-labelledby="b-label"></ul>
+              </div>
+            </div>
+            <p class="helper" id="b-helper">Open → focus moves into search. Trigger keeps rich content.</p>
+            <div class="sr-only" id="b-live" aria-live="polite"></div>
+          </div>
+          <p class="callout">
+            <strong>Try:</strong> <span class="kbd">Enter</span> / click to open — focus lands in search.
+            Arrow into options, <span class="kbd">Enter</span> to select, <span class="kbd">Esc</span> returns focus to the trigger.
+          </p>
+        </div>
+
+        <div class="card">
+          <h3>Why this works for icons</h3>
+          <p class="desc" style="margin:0 0 12px">
+            The collapsed field is <strong>not</strong> limited to an input string.
+            Avatar is real DOM inside the button. Name comes from label + value text
+            (“Assignee, Julia Martinez”), so AT is never “blank.”
+          </p>
+          <p class="desc" style="margin:0">
+            Trade-off: users don’t type in the same surface as the selected value —
+            they open first, then filter. Matches nested-search UX, with correct focus.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARE -->
+    <section class="panel" id="panel-c" role="tabpanel" aria-labelledby="tab-c" hidden>
+      <h2>Side-by-side</h2>
+      <p class="desc">Use this for the design ↔ eng decision.</p>
+      <div class="compare">
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th>A — Dual layer</th>
+              <th>B — Rich trigger + search</th>
+              <th>Old bug (don’t ship)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Icons/avatars when collapsed</td>
+              <td class="yes">Yes (decorative)</td>
+              <td class="yes">Yes (real DOM)</td>
+              <td class="yes">Yes</td>
+            </tr>
+            <tr>
+              <td>Input / control has selected value for AT</td>
+              <td class="yes">Yes — <code>input.value</code></td>
+              <td class="yes">Yes — button name includes value</td>
+              <td>No — empty input → “blank”</td>
+            </tr>
+            <tr>
+              <td>Type-to-filter in trigger</td>
+              <td class="yes">Yes</td>
+              <td>No — search in popup</td>
+              <td>Varies</td>
+            </tr>
+            <tr>
+              <td>Fits current eng direction</td>
+              <td class="yes">Closest (keep combobox value)</td>
+              <td>Needs pattern change</td>
+              <td>Regresses June fix</td>
+            </tr>
+            <tr>
+              <td>Custom <code>valueRenderer</code></td>
+              <td>Visual mirror only; keep string in sync</td>
+              <td>Full rich content in trigger</td>
+              <td>Broken a11y</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const PEOPLE = [
+      { id: "jm", label: "Julia Martinez", initials: "JM", tone: "a" },
+      { id: "jl", label: "Jordan Lee", initials: "JL", tone: "b" },
+      { id: "so", label: "Sam Okonkwo", initials: "SO", tone: "c" },
+      { id: "tb", label: "Taylor Brooks", initials: "TB", tone: "a" },
+      { id: "mp", label: "Morgan Patel", initials: "MP", tone: "b" },
+    ];
+
+    /* Tabs */
+    const tabs = [
+      ["tab-a", "panel-a"],
+      ["tab-b", "panel-b"],
+      ["tab-c", "panel-c"],
+    ];
+    tabs.forEach(([tabId, panelId]) => {
+      document.getElementById(tabId).addEventListener("click", () => {
+        tabs.forEach(([t, p]) => {
+          const selected = t === tabId;
+          document.getElementById(t).setAttribute("aria-selected", String(selected));
+          const panel = document.getElementById(p);
+          panel.classList.toggle("is-active", selected);
+          panel.hidden = !selected;
+        });
+      });
+    });
+
+    /* ========== Solution A ========== */
+    (function initA() {
+      const control = document.getElementById("a-control");
+      const input = document.getElementById("a-input");
+      const listbox = document.getElementById("a-listbox");
+      const clearBtn = document.getElementById("a-clear");
+      const toggleBtn = document.getElementById("a-toggle");
+      const rich = document.getElementById("a-rich");
+      const richAvatar = document.getElementById("a-rich-avatar");
+      const richLabel = document.getElementById("a-rich-label");
+      const live = document.getElementById("a-live");
+      const chevron = document.getElementById("a-chevron");
+
+      let selected = null;
+      let filtered = [...PEOPLE];
+      let activeIndex = -1;
+      let open = false;
+
+      function syncRich() {
+        if (selected && !control.classList.contains("is-filtering")) {
+          control.classList.add("has-rich");
+          richAvatar.textContent = selected.initials;
+          richAvatar.className = `avatar ${selected.tone}`;
+          richLabel.textContent = selected.label;
+          input.value = selected.label; // AT value — never empty when selected
+        } else {
+          control.classList.remove("has-rich");
+        }
+        clearBtn.hidden = !selected && !input.value;
+      }
+
+      function setOpen(next) {
+        open = next;
+        input.setAttribute("aria-expanded", String(open));
+        listbox.hidden = !open;
+        control.classList.toggle("is-open", open);
+        toggleBtn.setAttribute("aria-label", open ? "Hide options" : "Show options");
+        chevron.innerHTML = open
+          ? '<path d="M5 12.5l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>'
+          : '<path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (open) {
+          render();
+        } else {
+          activeIndex = -1;
+          input.removeAttribute("aria-activedescendant");
+          control.classList.remove("is-filtering");
+          syncRich();
+        }
+      }
+
+      function render() {
+        listbox.innerHTML = "";
+        if (!filtered.length) {
+          listbox.innerHTML = '<div class="empty">No assignees found</div>';
+          live.textContent = "No assignees found";
+          return;
+        }
+        filtered.forEach((p, i) => {
+          const li = document.createElement("li");
+          li.className = "option" + (i === activeIndex ? " is-active" : "");
+          li.id = `a-opt-${i}`;
+          li.setAttribute("role", "option");
+          li.setAttribute("aria-selected", String(selected && selected.id === p.id));
+          li.innerHTML = `<span class="avatar ${p.tone}" aria-hidden="true">${p.initials}</span><span>${p.label}</span>${selected && selected.id === p.id ? '<span class="check" aria-hidden="true">✓</span>' : ""}`;
+          li.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            select(p);
+          });
+          listbox.appendChild(li);
+        });
+        if (activeIndex >= 0) input.setAttribute("aria-activedescendant", `a-opt-${activeIndex}`);
+        live.textContent = `${filtered.length} options available`;
+      }
+
+      function select(p) {
+        selected = p;
+        control.classList.remove("is-filtering");
+        syncRich();
+        live.textContent = `${p.label} selected`;
+        setOpen(false);
+        input.focus();
+      }
+
+      function filter(q) {
+        const query = q.trim().toLowerCase();
+        filtered = PEOPLE.filter((p) => p.label.toLowerCase().includes(query));
+        activeIndex = filtered.length ? 0 : -1;
+        if (!open) setOpen(true);
+        else render();
+      }
+
+      input.addEventListener("focus", () => control.classList.add("is-focused"));
+      input.addEventListener("blur", () => {
+        control.classList.remove("is-focused");
+        setTimeout(() => {
+          if (!control.contains(document.activeElement)) setOpen(false);
+        }, 120);
+      });
+
+      input.addEventListener("input", () => {
+        const typing = input.value !== (selected && selected.label);
+        control.classList.toggle("is-filtering", typing || !selected);
+        if (typing) control.classList.remove("has-rich");
+        clearBtn.hidden = !input.value && !selected;
+        filter(input.value);
+      });
+
+      input.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (!open) {
+            if (selected) {
+              input.value = "";
+              control.classList.add("is-filtering");
+              control.classList.remove("has-rich");
+              filtered = [...PEOPLE];
+            }
+            setOpen(true);
+            activeIndex = 0;
+            render();
+          } else if (filtered.length) {
+            activeIndex = (activeIndex + 1) % filtered.length;
+            render();
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (!open) setOpen(true);
+          else if (filtered.length) {
+            activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+            render();
+          }
+        } else if (e.key === "Enter" && open && filtered[activeIndex]) {
+          e.preventDefault();
+          select(filtered[activeIndex]);
+        } else if (e.key === "Escape" && open) {
+          e.preventDefault();
+          setOpen(false);
+        }
+      });
+
+      clearBtn.addEventListener("click", () => {
+        selected = null;
+        input.value = "";
+        control.classList.remove("has-rich", "is-filtering");
+        clearBtn.hidden = true;
+        live.textContent = "Selection cleared";
+        filtered = [...PEOPLE];
+        input.focus();
+        if (open) { activeIndex = 0; render(); }
+      });
+
+      toggleBtn.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        input.focus();
+        if (open) setOpen(false);
+        else {
+          if (selected) {
+            input.value = "";
+            control.classList.add("is-filtering");
+            control.classList.remove("has-rich");
+          }
+          filtered = [...PEOPLE];
+          setOpen(true);
+          activeIndex = 0;
+          render();
+        }
+      });
+
+      // Start with a preselected example so rich state is obvious
+      selected = PEOPLE[0];
+      syncRich();
+    })();
+
+    /* ========== Solution B ========== */
+    (function initB() {
+      const control = document.getElementById("b-control");
+      const trigger = document.getElementById("b-trigger");
+      const content = document.getElementById("b-trigger-content");
+      const valueText = () => document.getElementById("b-value-text");
+      const popup = document.getElementById("b-popup");
+      const search = document.getElementById("b-search");
+      const list = document.getElementById("b-list");
+      const clearBtn = document.getElementById("b-clear");
+      const chevron = document.getElementById("b-chevron");
+      const live = document.getElementById("b-live");
+
+      let selected = null;
+      let filtered = [...PEOPLE];
+      let activeIndex = 0;
+      let open = false;
+
+      function renderTrigger() {
+        if (!selected) {
+          content.innerHTML = `<span class="placeholder" id="b-value-text">Select an assignee</span>`;
+          clearBtn.hidden = true;
+        } else {
+          content.innerHTML = `
+            <span class="avatar ${selected.tone}" aria-hidden="true">${selected.initials}</span>
+            <span class="value-label" id="b-value-text">${selected.label}</span>`;
+          clearBtn.hidden = false;
+        }
+      }
+
+      function renderList() {
+        list.innerHTML = "";
+        if (!filtered.length) {
+          list.innerHTML = '<div class="empty">No assignees found</div>';
+          live.textContent = "No assignees found";
+          return;
+        }
+        filtered.forEach((p, i) => {
+          const li = document.createElement("li");
+          li.className = "option" + (i === activeIndex ? " is-active" : "");
+          li.id = `b-opt-${i}`;
+          li.setAttribute("role", "option");
+          li.setAttribute("aria-selected", String(selected && selected.id === p.id));
+          li.innerHTML = `<span class="avatar ${p.tone}" aria-hidden="true">${p.initials}</span><span>${p.label}</span>${selected && selected.id === p.id ? '<span class="check" aria-hidden="true">✓</span>' : ""}`;
+          li.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            select(p);
+          });
+          list.appendChild(li);
+        });
+        live.textContent = `${filtered.length} options available`;
+      }
+
+      function setOpen(next) {
+        open = next;
+        trigger.setAttribute("aria-expanded", String(open));
+        popup.hidden = !open;
+        control.classList.toggle("is-open", open);
+        chevron.innerHTML = open
+          ? '<path d="M5 12.5l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>'
+          : '<path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (open) {
+          search.value = "";
+          filtered = [...PEOPLE];
+          activeIndex = selected ? Math.max(0, PEOPLE.findIndex((p) => p.id === selected.id)) : 0;
+          renderList();
+          // Critical: move focus into search
+          requestAnimationFrame(() => search.focus());
+        }
+      }
+
+      function select(p) {
+        selected = p;
+        renderTrigger();
+        live.textContent = `${p.label} selected`;
+        setOpen(false);
+        trigger.focus();
+      }
+
+      trigger.addEventListener("click", () => setOpen(!open));
+      trigger.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (!open) setOpen(true);
+        }
+      });
+      trigger.addEventListener("focus", () => control.classList.add("is-focused"));
+      trigger.addEventListener("blur", () => {
+        setTimeout(() => {
+          if (!control.contains(document.activeElement)) {
+            control.classList.remove("is-focused");
+            if (open) setOpen(false);
+          }
+        }, 120);
+      });
+
+      search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        filtered = PEOPLE.filter((p) => p.label.toLowerCase().includes(q));
+        activeIndex = filtered.length ? 0 : -1;
+        renderList();
+      });
+
+      search.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (filtered.length) {
+            activeIndex = (activeIndex + 1) % filtered.length;
+            renderList();
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (filtered.length) {
+            activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+            renderList();
+          }
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          if (filtered[activeIndex]) select(filtered[activeIndex]);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          setOpen(false);
+          trigger.focus();
+        }
+      });
+
+      clearBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selected = null;
+        renderTrigger();
+        live.textContent = "Selection cleared";
+        trigger.focus();
+      });
+
+      document.getElementById("b-chevron-btn").addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        setOpen(!open);
+      });
+
+      renderTrigger();
+    })();
+  </script>
+</body>
+</html>
