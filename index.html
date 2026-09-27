@@ -508,6 +508,110 @@
       font-size: 0.8125rem;
       margin-top: 8px;
     }
+
+    /* Nested-search pattern (accessible) */
+    .start-icon {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+    }
+    .start-icon svg { width: 18px; height: 18px; display: block; }
+    .start-icon.accent { color: var(--focus); }
+
+    .ns-states {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 12px 0 20px;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      .ns-states { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .ns-states { grid-template-columns: 1fr; }
+    }
+    .ns-states .mini-card { min-height: 0; }
+    .ns-states .field-label,
+    .ns-states .fake-label { font-size: 0.8125rem; }
+
+    .ns-trigger-btn {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 0;
+      background: transparent;
+      font: inherit;
+      font-size: 0.875rem;
+      color: var(--text);
+      padding: 8px 8px 8px 12px;
+      cursor: pointer;
+      text-align: left;
+      outline: none;
+    }
+    .ns-trigger-btn .placeholder { color: #676879; }
+    .ns-trigger-btn .value-label { font-weight: 500; color: var(--text); }
+
+    .ns-popup {
+      position: absolute;
+      z-index: 30;
+      left: 0;
+      right: 0;
+      top: calc(100% + 4px);
+      background: #fff;
+      border: 1px solid var(--border-soft);
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(50,51,56,.12);
+      padding: 8px;
+    }
+    .ns-popup[hidden] { display: none; }
+    .ns-search-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 0 10px;
+      margin-bottom: 6px;
+      min-height: 36px;
+      background: #fff;
+    }
+    .ns-search-wrap.is-focused,
+    .ns-search-wrap:focus-within {
+      border-color: var(--focus);
+      box-shadow: 0 0 0 3px var(--focus-ring);
+    }
+    .ns-search {
+      flex: 1;
+      border: 0;
+      outline: none;
+      font: inherit;
+      font-size: 0.875rem;
+      padding: 8px 0;
+      background: transparent;
+      color: var(--text);
+    }
+    .ns-search::placeholder { color: #676879; }
+    .ns-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .control.is-hover { border-color: #9699a6; }
+    .a11y-fixes {
+      margin: 16px 0 0;
+      padding-left: 1.2rem;
+      font-size: 0.875rem;
+    }
+    .a11y-fixes li { margin-bottom: 8px; }
   </style>
 </head>
 <body>
@@ -522,7 +626,8 @@
       <a href="#problem">1. The problem</a>
       <a href="#solution">2. Dual-layer solution</a>
       <a href="#why-works">3. Why it works</a>
-      <a href="#handoff">4. Handoff notes</a>
+      <a href="#nested-search">4. Nested-search pattern</a>
+      <a href="#handoff">5. Handoff notes</a>
     </nav>
   </header>
 
@@ -829,9 +934,175 @@
       </ul>
     </section>
 
+    <!-- 4. NESTED SEARCH (design frame, accessible) -->
+    <section id="nested-search">
+      <h2>4. Nested-search pattern (with start icon) — accessible version</h2>
+      <p class="section-intro">
+        Matches the design frame: trigger field + popup with its own search row (magnifying-glass start icon)
+        and option list. Below is the same layout made accessible — not the broken “focus stays on the
+        outer field while typing happens in a second input” version.
+      </p>
+
+      <div class="callout warn">
+        <span class="label">What we fix vs the raw frame</span>
+        Visible <strong>label</strong> (not placeholder-only) · selected value shows a real
+        <strong>start icon + text</strong> with an accessible name · on open,
+        <strong>focus moves into search</strong> · search is labeled and is <strong>not</strong> a list option ·
+        clear control named · Esc restores focus to the trigger.
+      </div>
+
+      <h3>Static states (aligned to the design)</h3>
+      <div class="ns-states">
+        <div class="mini-card">
+          <h4>Default</h4>
+          <span class="fake-label">Channel</span>
+          <div class="control" style="pointer-events:none;max-width:100%">
+            <span class="ns-trigger-btn"><span class="placeholder">Select a channel</span></span>
+            <div class="actions">
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+          <p class="helper">Where should we send updates?</p>
+        </div>
+
+        <div class="mini-card">
+          <h4>Hover</h4>
+          <span class="fake-label">Channel</span>
+          <div class="control is-hover" style="pointer-events:none;max-width:100%">
+            <span class="ns-trigger-btn"><span class="placeholder">Select a channel</span></span>
+            <div class="actions">
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+          <p class="helper">Where should we send updates?</p>
+        </div>
+
+        <div class="mini-card">
+          <h4>Active (search focused)</h4>
+          <span class="fake-label">Channel</span>
+          <div class="control is-open" style="pointer-events:none;max-width:100%;position:relative;z-index:2">
+            <span class="ns-trigger-btn"><span class="placeholder">Select a channel</span></span>
+            <div class="actions">
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg></span>
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 12.5l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+          <div class="ns-popup" style="position:relative;top:4px;display:block;max-width:100%">
+            <div class="ns-search-wrap is-focused">
+              <span class="start-icon accent" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
+              </span>
+              <span style="font-size:0.875rem;color:#676879">Search for channel</span>
+            </div>
+            <ul class="ns-list" role="presentation">
+              <li class="option"><span class="start-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3 6.5l7 5 7-5"/></svg></span> Email</li>
+              <li class="option"><span class="start-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7h12v8H4z"/><path d="M4 7l6 4.5L16 7"/></svg></span> In-app</li>
+              <li class="option"><span class="start-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="6"/><path d="M10 7v4l2.5 1.5"/></svg></span> Slack</li>
+              <li class="option"><span class="start-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="6" y="3" width="8" height="14" rx="1.5"/><path d="M9 15h2"/></svg></span> Mobile push</li>
+              <li class="option"><span class="start-icon" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h12v9H4z"/><path d="M7 3h6v3H7z"/></svg></span> SMS</li>
+            </ul>
+          </div>
+          <p class="state-note">Focus is in the search field (blue ring), not left on the outer trigger.</p>
+        </div>
+
+        <div class="mini-card">
+          <h4>Selected (start icon)</h4>
+          <span class="fake-label">Channel</span>
+          <div class="control" style="pointer-events:none;max-width:100%">
+            <span class="ns-trigger-btn">
+              <span class="start-icon accent" aria-hidden="true">
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3 6.5l7 5 7-5"/></svg>
+              </span>
+              <span class="value-label">Email</span>
+            </span>
+            <div class="actions">
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg></span>
+              <span class="icon-btn" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            </div>
+          </div>
+          <p class="helper">Where should we send updates?</p>
+          <div class="sr-announce good" style="margin-top:10px">“Channel, Email, button” <span style="opacity:.75">(name includes value; icon decorative)</span></div>
+        </div>
+      </div>
+
+      <h3>Interactive — try keyboard</h3>
+      <div class="mini-card" style="background:#fff;margin-bottom:8px">
+        <h4>Live nested-search select</h4>
+        <div style="position:relative;max-width:300px" id="ns-root">
+          <span class="field-label" id="ns-label">Channel</span>
+          <div class="control" id="ns-control">
+            <button
+              type="button"
+              class="ns-trigger-btn"
+              id="ns-trigger"
+              aria-labelledby="ns-label ns-value-text"
+              aria-describedby="ns-helper"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="ns-list"
+            >
+              <span id="ns-trigger-content">
+                <span class="placeholder" id="ns-value-text">Select a channel</span>
+              </span>
+            </button>
+            <div class="actions">
+              <button type="button" class="icon-btn" id="ns-clear" aria-label="Clear selection" hidden>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+              </button>
+              <button type="button" class="icon-btn" id="ns-chevron-btn" tabindex="-1" aria-hidden="true">
+                <svg id="ns-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="ns-popup" id="ns-popup" hidden>
+              <div class="ns-search-wrap" id="ns-search-wrap">
+                <span class="start-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
+                </span>
+                <input
+                  class="ns-search"
+                  id="ns-search"
+                  type="text"
+                  aria-label="Filter channels"
+                  placeholder="Search for channel"
+                  autocomplete="off"
+                />
+              </div>
+              <ul class="ns-list" id="ns-list" role="listbox" aria-labelledby="ns-label"></ul>
+            </div>
+          </div>
+          <p class="helper" id="ns-helper">Where should we send updates?</p>
+          <div class="sr-only" id="ns-live" aria-live="polite"></div>
+        </div>
+        <p class="state-note" style="margin-top:12px;max-width:52ch">
+          <span class="kbd">Enter</span>/<span class="kbd">↓</span> open → focus in search ·
+          <span class="kbd">↓</span>/<span class="kbd">↑</span> options ·
+          <span class="kbd">Enter</span> select ·
+          <span class="kbd">Esc</span> close + return to trigger.
+          Selected state shows <strong>start icon + label</strong> in the trigger.
+        </p>
+      </div>
+
+      <h3>Accessibility changes applied</h3>
+      <ul class="a11y-fixes">
+        <li><strong>Pattern:</strong> collapsed control is a <code>button</code> (can host start icon in real DOM). Search lives only in the popup.</li>
+        <li><strong>Focus on open:</strong> moves to the filter input — not left on the outer field while a second input is the typing surface.</li>
+        <li><strong>Names:</strong> visible label “Channel”; search <code>aria-label="Filter channels"</code>; clear <code>aria-label="Clear selection"</code>; start icons <code>aria-hidden</code>.</li>
+        <li><strong>Selected value:</strong> trigger accessible name includes the label text (“Channel, Email”) so AT is never blank — icons stay decorative.</li>
+        <li><strong>List semantics:</strong> options are <code>role="option"</code>; search row is outside the listbox options.</li>
+        <li><strong>Placeholder ≠ label:</strong> “Select a channel” / “Search for channel” are hints only.</li>
+      </ul>
+
+      <div class="callout info">
+        <span class="label">When to use this vs dual-layer</span>
+        Use <strong>nested search</strong> when the design requires a dedicated search row in the menu
+        (and rich start icons in the closed field as real DOM). Use <strong>dual-layer</strong> when
+        users should type to filter in the same field as the value (editable combobox).
+      </div>
+    </section>
+
     <!-- 5. HANDOFF -->
     <section id="handoff">
-      <h2>4. Handoff checklist</h2>
+      <h2>5. Handoff checklist</h2>
       <ul class="clean">
         <li>When selected and not filtering: set <code>input.value</code> to option label; show decorative <code>startElement</code> / avatar with <code>aria-hidden="true"</code>.</li>
         <li>Visually hide input text (e.g. transparent) — do <strong>not</strong> clear <code>value</code>.</li>
@@ -840,12 +1111,14 @@
         <li>Keep existing props: <code>label</code>, <code>helperText</code> + <code>aria-describedby</code>, <code>clearAriaLabel</code>, <code>noOptionsMessage</code>.</li>
         <li>Prefer <code>aria-haspopup="listbox"</code> when the popup is a listbox (align with APG); confirm against current dialog markup.</li>
         <li>Document for Storybook: “Searchable collapsed value may look rich; accessible value is always the label string.”</li>
+        <li>If using nested search (section 4): on open move focus to filter input; trigger name includes selected label; start icons <code>aria-hidden</code>; search not an option.</li>
       </ul>
 
       <div class="callout info">
         <span class="label">Recommendation</span>
-        Adopt dual-layer for searchable single-select so collapsed icons/avatars can return
-        without regressing the June accessibility fix.
+        Prefer <strong>dual-layer</strong> when filtering stays in the trigger field.
+        Use the <strong>nested-search</strong> pattern when the design requires a search row in the menu
+        and real start icons in the closed field — with the focus and naming rules above.
       </div>
     </section>
 
@@ -1032,6 +1305,176 @@
     });
 
     syncRich();
+
+    /* —— Nested-search pattern (section 4) —— */
+    const CHANNELS = [
+      {
+        id: "email",
+        label: "Email",
+        icon: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="3" y="5" width="14" height="10" rx="1.5"/><path d="M3 6.5l7 5 7-5"/></svg>',
+      },
+      {
+        id: "inapp",
+        label: "In-app",
+        icon: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 7h12v8H4z"/><path d="M4 7l6 4.5L16 7"/></svg>',
+      },
+      {
+        id: "slack",
+        label: "Slack",
+        icon: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="M10 7v4l2.5 1.5"/></svg>',
+      },
+      {
+        id: "mobile",
+        label: "Mobile push",
+        icon: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><rect x="6" y="3" width="8" height="14" rx="1.5"/><path d="M9 15h2"/></svg>',
+      },
+      {
+        id: "sms",
+        label: "SMS",
+        icon: '<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M4 6h12v9H4z"/><path d="M7 3h6v3H7z"/></svg>',
+      },
+    ];
+
+    (function initNestedSearch() {
+      const control = document.getElementById("ns-control");
+      const trigger = document.getElementById("ns-trigger");
+      const content = document.getElementById("ns-trigger-content");
+      const popup = document.getElementById("ns-popup");
+      const search = document.getElementById("ns-search");
+      const list = document.getElementById("ns-list");
+      const clearBtn = document.getElementById("ns-clear");
+      const chevron = document.getElementById("ns-chevron");
+      const live = document.getElementById("ns-live");
+
+      let selected = null;
+      let filtered = [...CHANNELS];
+      let activeIndex = 0;
+      let open = false;
+
+      function renderTrigger() {
+        if (!selected) {
+          content.innerHTML = `<span class="placeholder" id="ns-value-text">Select a channel</span>`;
+          clearBtn.hidden = true;
+        } else {
+          content.innerHTML = `
+            <span class="start-icon accent" aria-hidden="true">${selected.icon}</span>
+            <span class="value-label" id="ns-value-text">${selected.label}</span>`;
+          clearBtn.hidden = false;
+        }
+      }
+
+      function renderList() {
+        list.innerHTML = "";
+        if (!filtered.length) {
+          list.innerHTML = '<div class="empty">No channels found</div>';
+          live.textContent = "No channels found";
+          return;
+        }
+        filtered.forEach((item, i) => {
+          const li = document.createElement("li");
+          li.className = "option" + (i === activeIndex ? " is-active" : "");
+          li.id = `ns-opt-${i}`;
+          li.setAttribute("role", "option");
+          li.setAttribute("aria-selected", String(!!(selected && selected.id === item.id)));
+          li.innerHTML = `<span class="start-icon" aria-hidden="true">${item.icon}</span><span>${item.label}</span>${selected && selected.id === item.id ? '<span class="check" aria-hidden="true">✓</span>' : ""}`;
+          li.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            select(item);
+          });
+          list.appendChild(li);
+        });
+        live.textContent = `${filtered.length} options available`;
+      }
+
+      function setOpen(next) {
+        open = next;
+        trigger.setAttribute("aria-expanded", String(open));
+        popup.hidden = !open;
+        control.classList.toggle("is-open", open);
+        chevron.innerHTML = open
+          ? '<path d="M5 12.5l5-5 5 5" stroke-linecap="round" stroke-linejoin="round"/>'
+          : '<path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (open) {
+          search.value = "";
+          filtered = [...CHANNELS];
+          activeIndex = selected
+            ? Math.max(0, CHANNELS.findIndex((c) => c.id === selected.id))
+            : 0;
+          renderList();
+          requestAnimationFrame(() => search.focus());
+        }
+      }
+
+      function select(item) {
+        selected = item;
+        renderTrigger();
+        live.textContent = `${item.label} selected`;
+        setOpen(false);
+        trigger.focus();
+      }
+
+      trigger.addEventListener("click", () => setOpen(!open));
+      trigger.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (!open) setOpen(true);
+        }
+      });
+      trigger.addEventListener("focus", () => control.classList.add("is-focused"));
+      trigger.addEventListener("blur", () => {
+        setTimeout(() => {
+          if (!control.contains(document.activeElement)) {
+            control.classList.remove("is-focused");
+            if (open) setOpen(false);
+          }
+        }, 120);
+      });
+
+      search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        filtered = CHANNELS.filter((c) => c.label.toLowerCase().includes(q));
+        activeIndex = filtered.length ? 0 : -1;
+        renderList();
+      });
+
+      search.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (filtered.length) {
+            activeIndex = (activeIndex + 1) % filtered.length;
+            renderList();
+          }
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (filtered.length) {
+            activeIndex = (activeIndex - 1 + filtered.length) % filtered.length;
+            renderList();
+          }
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          if (filtered[activeIndex]) select(filtered[activeIndex]);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          setOpen(false);
+          trigger.focus();
+        }
+      });
+
+      clearBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selected = null;
+        renderTrigger();
+        live.textContent = "Selection cleared";
+        trigger.focus();
+      });
+
+      document.getElementById("ns-chevron-btn").addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        setOpen(!open);
+      });
+
+      renderTrigger();
+    })();
   </script>
 </body>
 </html>
