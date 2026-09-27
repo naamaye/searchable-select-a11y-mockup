@@ -421,17 +421,20 @@
       z-index: 2;
       max-width: calc(100% - 72px);
     }
-    /* After selection: avatar + label stay visible (even while focused).
-       Only switch to plain editable text + caret when the user starts typing to filter. */
-    .control.has-rich:not(.is-filtering) .a-rich { display: flex; }
-    .control.has-rich:not(.is-filtering) .a-input {
+    /* Rich chrome when selected & not editing; on focus, show real text + caret */
+    .control.has-rich:not(.is-filtering):not(.is-focused) .a-rich { display: flex; }
+    .control.has-rich:not(.is-filtering):not(.is-focused) .a-input {
       color: transparent;
       caret-color: transparent;
     }
-    .control.has-rich.is-filtering .a-rich { display: none; }
+    .control.has-rich.is-focused .a-input,
     .control.has-rich.is-filtering .a-input {
       color: var(--text);
       caret-color: var(--focus);
+    }
+    .control.has-rich.is-focused .a-rich,
+    .control.has-rich.is-filtering .a-rich {
+      display: none;
     }
     .a-rich-label {
       font-size: 0.875rem;
@@ -678,7 +681,7 @@
         <div class="mini-card" style="background:#fff">
           <h4>A · Dual-layer (type in trigger)</h4>
           <p class="state-note" style="margin-bottom:12px">
-            After select: avatar + name stay visible. Type to filter — then caret/text appear.
+            Focus shows caret + editable text. Avatar returns when you blur with a selection.
             Keys: <span class="kbd">↓</span> <span class="kbd">↑</span> <span class="kbd">Enter</span> <span class="kbd">Esc</span>
           </p>
           <div style="position:relative;max-width:300px" id="demo-root">
@@ -1019,9 +1022,10 @@
       </div>
 
       <div class="callout info">
-        <span class="label">Selected vs typing</span>
-        After select (including while focused): show <strong>avatar + label</strong> — not plain text only.
-        When the user <strong>starts typing</strong> to filter: hide rich chrome, show real text + caret.
+        <span class="label">Caret / cursor detail</span>
+        Collapsed (unfocused): rich avatar + label, caret hidden.
+        On <strong>focus</strong>: rich chrome hides, real input text and blinking caret show so the
+        field is clearly editable — without the caret cutting through the overlay.
       </div>
 
       <h3>What this does <em>not</em> claim</h3>
@@ -1324,7 +1328,13 @@
       else render();
     }
 
-    input.addEventListener("focus", () => control.classList.add("is-focused"));
+    input.addEventListener("focus", () => {
+      control.classList.add("is-focused");
+      requestAnimationFrame(() => {
+        const len = input.value.length;
+        try { input.setSelectionRange(len, len); } catch (_) { /* ignore */ }
+      });
+    });
     input.addEventListener("blur", () => {
       control.classList.remove("is-focused");
       setTimeout(() => {
