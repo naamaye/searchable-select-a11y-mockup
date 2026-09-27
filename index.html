@@ -29,12 +29,9 @@
     }
 
     * { box-sizing: border-box; }
-    html, body {
-      height: 100%;
-      margin: 0;
-      overflow: hidden;
-    }
+    html { scroll-behavior: smooth; }
     body {
+      margin: 0;
       font-family: var(--font);
       color: var(--text);
       background:
@@ -42,24 +39,18 @@
         radial-gradient(900px 420px at 100% 0%, #f3e8f2 0%, transparent 50%),
         var(--bg);
       line-height: 1.5;
-      display: flex;
-      flex-direction: column;
+      padding: 0 0 48px;
     }
 
     .shell {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
       max-width: 1100px;
       width: 100%;
       margin: 0 auto;
-      padding: 20px 20px 16px;
-      min-height: 0;
+      padding: 28px 20px 0;
     }
 
     .hero {
-      flex-shrink: 0;
-      padding: 0 4px 14px;
+      padding: 0 4px 16px;
     }
     .eyebrow {
       font-size: 0.7rem;
@@ -87,7 +78,11 @@
       flex-wrap: wrap;
       gap: 6px;
       margin-top: 14px;
-      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      padding: 10px 0;
+      background: linear-gradient(to bottom, var(--bg) 70%, transparent);
     }
     .tab {
       appearance: none;
@@ -110,22 +105,16 @@
     .tab:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
     .page {
-      flex: 1;
-      min-height: 0;
-      display: flex;
-      flex-direction: column;
+      padding: 0 0 8px;
     }
 
     .tabpanel {
-      flex: 1;
-      min-height: 0;
-      background: var(--surface);
-      border: 1px solid var(--border-soft);
-      border-radius: 14px;
-      box-shadow: 0 1px 2px rgba(50, 51, 56, 0.04);
-      overflow: auto;
-      padding: 24px 28px 28px;
-      -webkit-overflow-scrolling: touch;
+      background: transparent;
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding: 8px 4px 24px;
+      overflow: visible;
     }
     .tabpanel[hidden] {
       display: none !important;
@@ -145,11 +134,11 @@
     }
 
     .footer-note {
-      flex-shrink: 0;
       text-align: center;
       color: var(--text-secondary);
       font-size: 0.75rem;
-      margin: 10px 0 0;
+      margin: 8px 0 0;
+      padding: 0 4px;
     }
     h3 {
       margin: 22px 0 8px;
@@ -990,6 +979,63 @@
         clear control named · Esc restores focus to the trigger.
       </div>
 
+      <h3>Interactive — try keyboard</h3>
+      <div class="mini-card" style="background:#fff;margin-bottom:20px">
+        <h4>Live nested-search select</h4>
+        <div style="position:relative;max-width:300px" id="ns-root">
+          <span class="field-label" id="ns-label">Channel</span>
+          <div class="control" id="ns-control">
+            <button
+              type="button"
+              class="ns-trigger-btn"
+              id="ns-trigger"
+              aria-labelledby="ns-label ns-value-text"
+              aria-describedby="ns-helper"
+              aria-haspopup="listbox"
+              aria-expanded="false"
+              aria-controls="ns-list"
+            >
+              <span id="ns-trigger-content">
+                <span class="placeholder" id="ns-value-text">Select a channel</span>
+              </span>
+            </button>
+            <div class="actions">
+              <button type="button" class="icon-btn" id="ns-clear" aria-label="Clear selection" hidden>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+              </button>
+              <button type="button" class="icon-btn" id="ns-chevron-btn" tabindex="-1" aria-hidden="true">
+                <svg id="ns-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="ns-popup" id="ns-popup" hidden>
+              <div class="ns-search-wrap" id="ns-search-wrap">
+                <span class="start-icon" aria-hidden="true">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
+                </span>
+                <input
+                  class="ns-search"
+                  id="ns-search"
+                  type="text"
+                  aria-label="Filter channels"
+                  placeholder="Search for channel"
+                  autocomplete="off"
+                />
+              </div>
+              <ul class="ns-list" id="ns-list" role="listbox" aria-labelledby="ns-label"></ul>
+            </div>
+          </div>
+          <p class="helper" id="ns-helper">Where should we send updates?</p>
+          <div class="sr-only" id="ns-live" aria-live="polite"></div>
+        </div>
+        <p class="state-note" style="margin-top:12px;max-width:52ch">
+          <span class="kbd">Enter</span>/<span class="kbd">↓</span> open → focus in search ·
+          <span class="kbd">↓</span>/<span class="kbd">↑</span> options ·
+          <span class="kbd">Enter</span> select ·
+          <span class="kbd">Esc</span> close + return to trigger.
+          Selected state shows <strong>start icon + label</strong> in the trigger.
+        </p>
+      </div>
+
       <h3>Static states (aligned to the design)</h3>
       <div class="ns-states">
         <div class="mini-card">
@@ -1064,63 +1110,6 @@
         </div>
       </div>
 
-      <h3>Interactive — try keyboard</h3>
-      <div class="mini-card" style="background:#fff;margin-bottom:8px">
-        <h4>Live nested-search select</h4>
-        <div style="position:relative;max-width:300px" id="ns-root">
-          <span class="field-label" id="ns-label">Channel</span>
-          <div class="control" id="ns-control">
-            <button
-              type="button"
-              class="ns-trigger-btn"
-              id="ns-trigger"
-              aria-labelledby="ns-label ns-value-text"
-              aria-describedby="ns-helper"
-              aria-haspopup="listbox"
-              aria-expanded="false"
-              aria-controls="ns-list"
-            >
-              <span id="ns-trigger-content">
-                <span class="placeholder" id="ns-value-text">Select a channel</span>
-              </span>
-            </button>
-            <div class="actions">
-              <button type="button" class="icon-btn" id="ns-clear" aria-label="Clear selection" hidden>
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
-              </button>
-              <button type="button" class="icon-btn" id="ns-chevron-btn" tabindex="-1" aria-hidden="true">
-                <svg id="ns-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-            <div class="ns-popup" id="ns-popup" hidden>
-              <div class="ns-search-wrap" id="ns-search-wrap">
-                <span class="start-icon" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
-                </span>
-                <input
-                  class="ns-search"
-                  id="ns-search"
-                  type="text"
-                  aria-label="Filter channels"
-                  placeholder="Search for channel"
-                  autocomplete="off"
-                />
-              </div>
-              <ul class="ns-list" id="ns-list" role="listbox" aria-labelledby="ns-label"></ul>
-            </div>
-          </div>
-          <p class="helper" id="ns-helper">Where should we send updates?</p>
-          <div class="sr-only" id="ns-live" aria-live="polite"></div>
-        </div>
-        <p class="state-note" style="margin-top:12px;max-width:52ch">
-          <span class="kbd">Enter</span>/<span class="kbd">↓</span> open → focus in search ·
-          <span class="kbd">↓</span>/<span class="kbd">↑</span> options ·
-          <span class="kbd">Enter</span> select ·
-          <span class="kbd">Esc</span> close + return to trigger.
-          Selected state shows <strong>start icon + label</strong> in the trigger.
-        </p>
-      </div>
-
       <h3>Accessibility changes applied</h3>
       <ul class="a11y-fixes">
         <li><strong>Pattern:</strong> collapsed control is a <code>button</code> (can host start icon in real DOM). Search lives only in the popup.</li>
@@ -1180,11 +1169,11 @@
           if (!panel) return;
           panel.classList.toggle("is-active", selected);
           panel.hidden = !selected;
-          if (selected) panel.scrollTop = 0;
         });
         if (updateHash) {
           history.replaceState(null, "", "#" + id);
         }
+        window.scrollTo(0, 0);
         if (focusTab) {
           document.getElementById("tab-" + id)?.focus();
         }
