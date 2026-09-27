@@ -421,20 +421,32 @@
       z-index: 2;
       max-width: calc(100% - 72px);
     }
-    /* Rich chrome when selected & not editing; on focus, show real text + caret */
-    .control.has-rich:not(.is-filtering):not(.is-focused) .a-rich { display: flex; }
+    /*
+      Rich selected value:
+      - Blurred: avatar + label overlay (input text transparent)
+      - Focused: keep avatar; show real input text + caret (hide overlay label so name isn’t doubled)
+      - Filtering: hide rich chrome entirely
+    */
+    .control.has-rich:not(.is-filtering) .a-rich { display: flex; }
     .control.has-rich:not(.is-filtering):not(.is-focused) .a-input {
       color: transparent;
       caret-color: transparent;
     }
-    .control.has-rich.is-focused .a-input,
+    .control.has-rich.is-focused:not(.is-filtering) .a-rich-label {
+      display: none;
+    }
+    .control.has-rich.is-focused:not(.is-filtering) .a-input {
+      color: var(--text);
+      caret-color: var(--focus);
+      /* Room for absolute avatar (22px) + gap */
+      padding-left: 40px;
+    }
+    .control.has-rich.is-filtering .a-rich {
+      display: none;
+    }
     .control.has-rich.is-filtering .a-input {
       color: var(--text);
       caret-color: var(--focus);
-    }
-    .control.has-rich.is-focused .a-rich,
-    .control.has-rich.is-filtering .a-rich {
-      display: none;
     }
     .a-rich-label {
       font-size: 0.875rem;
@@ -681,7 +693,7 @@
         <div class="mini-card" style="background:#fff">
           <h4>A · Dual-layer (type in trigger)</h4>
           <p class="state-note" style="margin-bottom:12px">
-            Focus shows caret + editable text. Avatar returns when you blur with a selection.
+            Focus keeps the avatar and shows a caret in the name. Full chrome hides when you type to filter.
             Keys: <span class="kbd">↓</span> <span class="kbd">↑</span> <span class="kbd">Enter</span> <span class="kbd">Esc</span>
           </p>
           <div style="position:relative;max-width:300px" id="demo-root">
@@ -1023,9 +1035,10 @@
 
       <div class="callout info">
         <span class="label">Caret / cursor detail</span>
-        Collapsed (unfocused): rich avatar + label, caret hidden.
-        On <strong>focus</strong>: rich chrome hides, real input text and blinking caret show so the
-        field is clearly editable — without the caret cutting through the overlay.
+        Collapsed (unfocused): avatar + label overlay; caret hidden.
+        On <strong>focus</strong>: avatar stays; overlay label hides so the real input text and caret
+        show beside the avatar (no caret-through-overlay).
+        On <strong>type / filter</strong>: avatar hides too; field is plain editable text.
       </div>
 
       <h3>What this does <em>not</em> claim</h3>
@@ -1156,8 +1169,8 @@
       <ul class="clean">
         <li>When selected and not filtering: set <code>input.value</code> to option label; show decorative <code>startElement</code> / avatar with <code>aria-hidden="true"</code>.</li>
         <li>Visually hide input text (e.g. transparent) — do <strong>not</strong> clear <code>value</code>.</li>
-        <li>On focus + type / filter mode: hide rich layer; show real text and caret.</li>
-        <li>On select / blur with selection: restore rich layer; keep focus on input.</li>
+        <li>On focus with selection: keep avatar; show real input text + caret (hide overlay label). On type / filter: hide full rich layer.</li>
+        <li>On select / blur with selection (and not filtering): restore rich layer; keep focus on input.</li>
         <li>Keep existing props: <code>label</code>, <code>helperText</code> + <code>aria-describedby</code>, <code>clearAriaLabel</code>, <code>noOptionsMessage</code>.</li>
         <li>Prefer <code>aria-haspopup="listbox"</code> when the popup is a listbox (align with APG); confirm against current dialog markup.</li>
         <li>Document for Storybook: “Searchable collapsed value may look rich; accessible value is always the label string.”</li>
