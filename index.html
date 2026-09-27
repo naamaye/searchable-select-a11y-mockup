@@ -421,12 +421,20 @@
       z-index: 2;
       max-width: calc(100% - 72px);
     }
-    .control.has-rich:not(.is-filtering) .a-rich { display: flex; }
-    .control.has-rich:not(.is-filtering) .a-input {
-      /* Value stays in the DOM for AT; text is painted by the rich layer.
-         Hide the caret while rich chrome is visible — otherwise it cuts through the overlay. */
+    /* Rich chrome when selected & not editing; on focus, show real text + caret */
+    .control.has-rich:not(.is-filtering):not(.is-focused) .a-rich { display: flex; }
+    .control.has-rich:not(.is-filtering):not(.is-focused) .a-input {
       color: transparent;
       caret-color: transparent;
+    }
+    .control.has-rich.is-focused .a-input,
+    .control.has-rich.is-filtering .a-input {
+      color: var(--text);
+      caret-color: var(--focus);
+    }
+    .control.has-rich.is-focused .a-rich,
+    .control.has-rich.is-filtering .a-rich {
+      display: none;
     }
     .a-rich-label {
       font-size: 0.875rem;
@@ -651,7 +659,8 @@
       without regressing the accessibility fix that put the selected label into the native input.
     </p>
     <div class="tabs" role="tablist" aria-label="Explanation sections">
-      <button type="button" class="tab" role="tab" id="tab-problem" aria-controls="problem" aria-selected="true">1. The problem</button>
+      <button type="button" class="tab" role="tab" id="tab-test-solutions" aria-controls="test-solutions" aria-selected="true">Test solutions</button>
+      <button type="button" class="tab" role="tab" id="tab-problem" aria-controls="problem" aria-selected="false" tabindex="-1">1. The problem</button>
       <button type="button" class="tab" role="tab" id="tab-solution" aria-controls="solution" aria-selected="false" tabindex="-1">2. Dual-layer</button>
       <button type="button" class="tab" role="tab" id="tab-why-works" aria-controls="why-works" aria-selected="false" tabindex="-1">3. Why it works</button>
       <button type="button" class="tab" role="tab" id="tab-nested-search" aria-controls="nested-search" aria-selected="false" tabindex="-1">4. Nested search</button>
@@ -660,8 +669,119 @@
   </header>
 
   <main class="page">
+    <!-- TEST SOLUTIONS (first) -->
+    <section id="test-solutions" class="tabpanel is-active" role="tabpanel" aria-labelledby="tab-test-solutions" tabindex="0">
+      <h2>Test solutions</h2>
+      <p class="section-intro">
+        Interactive demos only — try both patterns side by side. Open the other tabs for explanation,
+        static states, and handoff notes.
+      </p>
+
+      <div class="grid-2" style="align-items:start">
+        <div class="mini-card" style="background:#fff">
+          <h4>A · Dual-layer (type in trigger)</h4>
+          <p class="state-note" style="margin-bottom:12px">
+            Focus shows caret + editable text. Avatar returns when you blur with a selection.
+            Keys: <span class="kbd">↓</span> <span class="kbd">↑</span> <span class="kbd">Enter</span> <span class="kbd">Esc</span>
+          </p>
+          <div style="position:relative;max-width:300px" id="demo-root">
+            <label class="field-label" id="demo-label" for="demo-input">Person</label>
+            <div class="control has-rich" id="demo-control">
+              <div class="a-rich" id="demo-rich" aria-hidden="true">
+                <span class="avatar a" id="demo-rich-avatar">JM</span>
+                <span class="a-rich-label" id="demo-rich-label">Julia Martinez</span>
+              </div>
+              <input
+                class="a-input"
+                id="demo-input"
+                type="text"
+                role="combobox"
+                aria-labelledby="demo-label"
+                aria-describedby="demo-helper"
+                aria-autocomplete="list"
+                aria-expanded="false"
+                aria-controls="demo-listbox"
+                aria-haspopup="listbox"
+                autocomplete="off"
+                placeholder="Select a person"
+                value="Julia Martinez"
+              />
+              <div class="actions">
+                <button type="button" class="icon-btn" id="demo-clear" aria-label="Clear selection">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="icon-btn" id="demo-toggle" aria-label="Show options" tabindex="-1">
+                  <svg id="demo-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <ul class="listbox" id="demo-listbox" role="listbox" aria-labelledby="demo-label" hidden></ul>
+            </div>
+            <p class="helper" id="demo-helper">Choose a person. Type to search.</p>
+            <div class="sr-only" id="demo-live" aria-live="polite"></div>
+            <div class="sr-announce good" style="margin-top:12px" id="demo-sr-example">
+              On focus: “Person, Julia Martinez, combobox”
+            </div>
+          </div>
+        </div>
+
+        <div class="mini-card" style="background:#fff">
+          <h4>B · Nested search (start icon)</h4>
+          <p class="state-note" style="margin-bottom:12px">
+            Open moves focus into search. Selected value shows start icon + label.
+            Keys: <span class="kbd">Enter</span>/<span class="kbd">↓</span> open ·
+            <span class="kbd">↑</span>/<span class="kbd">↓</span> · <span class="kbd">Esc</span>
+          </p>
+          <div style="position:relative;max-width:300px" id="ns-root">
+            <span class="field-label" id="ns-label">Channel</span>
+            <div class="control" id="ns-control">
+              <button
+                type="button"
+                class="ns-trigger-btn"
+                id="ns-trigger"
+                aria-labelledby="ns-label ns-value-text"
+                aria-describedby="ns-helper"
+                aria-haspopup="listbox"
+                aria-expanded="false"
+                aria-controls="ns-list"
+              >
+                <span id="ns-trigger-content">
+                  <span class="placeholder" id="ns-value-text">Select a channel</span>
+                </span>
+              </button>
+              <div class="actions">
+                <button type="button" class="icon-btn" id="ns-clear" aria-label="Clear selection" hidden>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
+                </button>
+                <button type="button" class="icon-btn" id="ns-chevron-btn" tabindex="-1" aria-hidden="true">
+                  <svg id="ns-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
+              <div class="ns-popup" id="ns-popup" hidden>
+                <div class="ns-search-wrap" id="ns-search-wrap">
+                  <span class="start-icon" aria-hidden="true">
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
+                  </span>
+                  <input
+                    class="ns-search"
+                    id="ns-search"
+                    type="text"
+                    aria-label="Filter channels"
+                    placeholder="Search for channel"
+                    autocomplete="off"
+                  />
+                </div>
+                <ul class="ns-list" id="ns-list" role="listbox" aria-labelledby="ns-label"></ul>
+              </div>
+            </div>
+            <p class="helper" id="ns-helper">Where should we send updates?</p>
+            <div class="sr-only" id="ns-live" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 1. PROBLEM -->
-    <section id="problem" class="tabpanel is-active" role="tabpanel" aria-labelledby="tab-problem" tabindex="0">
+    <section id="problem" class="tabpanel" role="tabpanel" aria-labelledby="tab-problem" tabindex="0" hidden>
       <h2>1. The problem with the original dropdown</h2>
       <p class="section-intro">
         Before the 2026-06-24 accessibility fix, searchable single-select showed a rich selected value
@@ -776,55 +896,9 @@
         </div>
       </div>
 
-      <h3>Interactive demo</h3>
-      <p class="section-intro" style="margin-bottom:12px">
-        Starts with a selection so the rich collapsed state is visible. Type to filter — rich chrome
-        hides and the real caret/text appear. Keys:
-        <span class="kbd">↓</span>/<span class="kbd">↑</span>
-        <span class="kbd">Enter</span>
-        <span class="kbd">Esc</span>
-      </p>
-
-      <div class="mini-card" style="background:#fff;margin-bottom:20px">
-        <h4>Live combobox</h4>
-        <div style="position:relative;max-width:300px" id="demo-root">
-          <label class="field-label" id="demo-label" for="demo-input">Person</label>
-          <div class="control has-rich" id="demo-control">
-            <div class="a-rich" id="demo-rich" aria-hidden="true">
-              <span class="avatar a" id="demo-rich-avatar">JM</span>
-              <span class="a-rich-label" id="demo-rich-label">Julia Martinez</span>
-            </div>
-            <input
-              class="a-input"
-              id="demo-input"
-              type="text"
-              role="combobox"
-              aria-labelledby="demo-label"
-              aria-describedby="demo-helper"
-              aria-autocomplete="list"
-              aria-expanded="false"
-              aria-controls="demo-listbox"
-              aria-haspopup="listbox"
-              autocomplete="off"
-              placeholder="Select a person"
-              value="Julia Martinez"
-            />
-            <div class="actions">
-              <button type="button" class="icon-btn" id="demo-clear" aria-label="Clear selection">
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
-              </button>
-              <button type="button" class="icon-btn" id="demo-toggle" aria-label="Show options" tabindex="-1">
-                <svg id="demo-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-            <ul class="listbox" id="demo-listbox" role="listbox" aria-labelledby="demo-label" hidden></ul>
-          </div>
-          <p class="helper" id="demo-helper">Choose a person. Type to search.</p>
-          <div class="sr-only" id="demo-live" aria-live="polite"></div>
-          <div class="sr-announce good" style="margin-top:12px" id="demo-sr-example">
-            On focus: “Person, Julia Martinez, combobox”
-          </div>
-        </div>
+      <div class="callout info">
+        <span class="label">Try it live</span>
+        Interactive dual-layer demo is on the <strong>Test solutions</strong> tab (first tab).
       </div>
 
       <h3>Static stages</h3>
@@ -949,9 +1023,9 @@
 
       <div class="callout info">
         <span class="label">Caret / cursor detail</span>
-        While the rich layer is visible, hide the text caret (<code>caret-color: transparent</code>).
-        The caret still belongs to the real input underneath; if left visible it visually cuts through
-        the overlaid name. Show the caret again when filtering starts (rich layer hidden, real text shown).
+        Collapsed (unfocused): rich avatar + label, caret hidden.
+        On <strong>focus</strong>: rich chrome hides, real input text and blinking caret show so the
+        field is clearly editable — without the caret cutting through the overlay.
       </div>
 
       <h3>What this does <em>not</em> claim</h3>
@@ -979,61 +1053,9 @@
         clear control named · Esc restores focus to the trigger.
       </div>
 
-      <h3>Interactive — try keyboard</h3>
-      <div class="mini-card" style="background:#fff;margin-bottom:20px">
-        <h4>Live nested-search select</h4>
-        <div style="position:relative;max-width:300px" id="ns-root">
-          <span class="field-label" id="ns-label">Channel</span>
-          <div class="control" id="ns-control">
-            <button
-              type="button"
-              class="ns-trigger-btn"
-              id="ns-trigger"
-              aria-labelledby="ns-label ns-value-text"
-              aria-describedby="ns-helper"
-              aria-haspopup="listbox"
-              aria-expanded="false"
-              aria-controls="ns-list"
-            >
-              <span id="ns-trigger-content">
-                <span class="placeholder" id="ns-value-text">Select a channel</span>
-              </span>
-            </button>
-            <div class="actions">
-              <button type="button" class="icon-btn" id="ns-clear" aria-label="Clear selection" hidden>
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15" stroke-linecap="round"/></svg>
-              </button>
-              <button type="button" class="icon-btn" id="ns-chevron-btn" tabindex="-1" aria-hidden="true">
-                <svg id="ns-chevron" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M5 7.5l5 5 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </button>
-            </div>
-            <div class="ns-popup" id="ns-popup" hidden>
-              <div class="ns-search-wrap" id="ns-search-wrap">
-                <span class="start-icon" aria-hidden="true">
-                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M13 13l4 4" stroke-linecap="round"/></svg>
-                </span>
-                <input
-                  class="ns-search"
-                  id="ns-search"
-                  type="text"
-                  aria-label="Filter channels"
-                  placeholder="Search for channel"
-                  autocomplete="off"
-                />
-              </div>
-              <ul class="ns-list" id="ns-list" role="listbox" aria-labelledby="ns-label"></ul>
-            </div>
-          </div>
-          <p class="helper" id="ns-helper">Where should we send updates?</p>
-          <div class="sr-only" id="ns-live" aria-live="polite"></div>
-        </div>
-        <p class="state-note" style="margin-top:12px;max-width:52ch">
-          <span class="kbd">Enter</span>/<span class="kbd">↓</span> open → focus in search ·
-          <span class="kbd">↓</span>/<span class="kbd">↑</span> options ·
-          <span class="kbd">Enter</span> select ·
-          <span class="kbd">Esc</span> close + return to trigger.
-          Selected state shows <strong>start icon + label</strong> in the trigger.
-        </p>
+      <div class="callout info">
+        <span class="label">Try it live</span>
+        Interactive nested-search demo is on the <strong>Test solutions</strong> tab (first tab).
       </div>
 
       <h3>Static states (aligned to the design)</h3>
@@ -1194,9 +1216,9 @@
         });
       });
 
-      const initial = (location.hash || "#problem").slice(1);
+      const initial = (location.hash || "#test-solutions").slice(1);
       const valid = tabs.some((t) => t.getAttribute("aria-controls") === initial);
-      activate(valid ? initial : "problem", { updateHash: valid });
+      activate(valid ? initial : "test-solutions", { updateHash: valid });
 
       window.addEventListener("hashchange", () => {
         const id = location.hash.slice(1);
@@ -1306,7 +1328,14 @@
       else render();
     }
 
-    input.addEventListener("focus", () => control.classList.add("is-focused"));
+    input.addEventListener("focus", () => {
+      control.classList.add("is-focused");
+      // Show real text + caret (rich chrome hides via CSS while focused)
+      requestAnimationFrame(() => {
+        const len = input.value.length;
+        try { input.setSelectionRange(len, len); } catch (_) { /* ignore */ }
+      });
+    });
     input.addEventListener("blur", () => {
       control.classList.remove("is-focused");
       setTimeout(() => {
