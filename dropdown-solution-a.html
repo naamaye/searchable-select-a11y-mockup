@@ -442,44 +442,11 @@
     </p>
 
     <nav class="toc" aria-label="On this page">
-      <a href="#fit">Fit with current docs</a>
       <a href="#demo">Interactive example</a>
       <a href="#states">Static states</a>
       <a href="#why">Why this works</a>
       <a href="#handoff">Technical handoff</a>
     </nav>
-
-    <!-- 0. FIT -->
-    <section id="fit">
-      <h2>Fit with the current Storybook docs</h2>
-      <p class="section-intro">
-        Mapped to
-        <a href="https://62037c72e0e4d6004a9a450f-gotvpxzmkd.chromatic.com/?path=/docs/components-dropdown-searchable-single-select--docs" target="_blank" rel="noopener noreferrer">Searchable single select — Accessibility</a>
-        (Vibe / Chromatic).
-      </p>
-
-      <div class="callout ok">
-        <span class="label">What Solution A solves</span>
-        The docs’ <strong>selected value display trade-off</strong>: after the a11y fix, the collapsed
-        value is text-only — <code>startElement</code>, avatars, <code>endElement</code>, and searchable
-        <code>valueRenderer</code> only appear in the option list. Dual-layer restores rich collapsed
-        visuals while keeping the label string in <code>input.value</code> (WCAG 4.1.2).
-      </div>
-
-      <div class="callout info">
-        <span class="label">What Solution A must preserve (not replace)</span>
-        The 2026-06-24 fixes stay requirements: advertise the popup (<code>aria-haspopup</code> /
-        <code>aria-controls</code>), wire <code>helperText</code> with <code>aria-describedby</code>,
-        and keep focus on the input after select. Dual-layer does not invent a new a11y model — it
-        adds a decorative visual layer on top of the existing “value in input” rule.
-      </div>
-
-      <div class="callout warn">
-        <span class="label">Out of scope for A</span>
-        Interactive content inside the collapsed value (links, nested buttons). Heavy custom layouts
-        that cannot sync to a single label string may remain list-only.
-      </div>
-    </section>
 
     <!-- 1. DEMO -->
     <section id="demo">
